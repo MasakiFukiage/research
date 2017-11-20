@@ -6,7 +6,7 @@ import math
 import sys
 import time
 import random
-
+from tqdm import trange
 import numpy as np
 from numpy.random import *
 import six
@@ -86,17 +86,17 @@ losses = 0
 random = [i for i in range(out_size)]
 
 #leave one person
-for eval in range(1):
+for eval in range(data_num):
     o = eval + 1
     print("Training ", str(o), " Start...")
     #epoch loop
-    for seq in range(epoch):
+    for seq in trange(epoch, desc='epoch'):
         #subjects loop
-        for subjects in range(data_num):
+        for subjects in trange(data_num, desc='subjects'):
             if eval != subjects:
                 r = np.random.permutation(random)
                 #label loop
-                for l in range(out_size):
+                for l in trange(out_size, desc='label'):
                     # 前の系列の影響がなくなるようにリセット
                     lstm.reset_state()
                     #frame loop
@@ -109,22 +109,19 @@ for eval in range(1):
                             [label[subjects][r[l]][frame]]).astype(
                                 np.int32))
                         #順伝搬
-                        #                        if np.count_nonzero(test_data[subjects][r[l]][frame
-                        #                                                                      ]) == 0:
-                        if frame % 2 != 0:
-                            loss, acc, y = lstm(x, t)
-                            total_loss += loss.data
-                            losses += loss
-                            accuracy = acc.data
-                            num += 1
-                            n += 1
-                    total_accuracy += accuracy
-                    num2 += 1
-                losses /= n
+                        loss, acc, y = lstm(x, t)
+                        total_loss += loss.data
+                        losses += loss
+                        accuracy = acc.data
+                        num += 1
+                        n += 1
+                losses /= len(test_data[subjects][l])
+                n = 0
+                total_accuracy += accuracy
+                num2 += 1
                 lstm.zerograds()
                 losses.backward()
                 optimizer.update()
-                n = 0
         #各エポックの平均損失率
         if num != 0:
             average_loss = total_loss / num
