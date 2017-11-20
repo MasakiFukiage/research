@@ -148,7 +148,7 @@ for eval in range(data_num):
 interval = int(time.time() - start_time)
 print("実行時間: {}sec".format(interval))
 
-#lossグラフ作成
+#グラフ作成
 all_loss = []
 all_acc = []
 for i in range(out_size):
